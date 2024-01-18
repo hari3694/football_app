@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
-from external_api_manager import get_teams, get_competitions, get_areas
+from external_api_manager import ExternalApiManager
 
 api_blueprint = Blueprint('api_blueprint', __name__)
+api_manager = ExternalApiManager()
 
 
 @api_blueprint.route("/api/v1/select", methods=['POST'])
@@ -16,13 +17,13 @@ def select_operation():
             operation = body['operation'].casefold()
             if operation == "get_teams":
                 if "competition_code" in body:
-                    data = get_teams(body["competition_code"].upper())
+                    data = api_manager.get_teams(body["competition_code"].upper())
                 else:
                     return {"message": "To get the teams, include the param 'competition_code' in  request"}, 200
             elif operation == "get_competitions":
-                data = get_competitions()
+                data = api_manager.get_competitions()
             elif operation == "get_areas":
-                data = get_areas()
+                data = api_manager.get_areas()
             else:
                 return {"message": f"{operation} is not a valid operation"}, 200
             return {"data": data}, 200
@@ -43,7 +44,7 @@ def get_team_data():
             teamname = team.replace(" ", "").casefold()
 
             competition_code = body["competition_code"].upper()
-            teams_data = get_teams(competition_code=competition_code)
+            teams_data = api_manager.get_teams(competition_code=competition_code)
             for item in teams_data:
                 club_name = item.get('name').casefold()
                 club_name = club_name.replace(" ", "")
